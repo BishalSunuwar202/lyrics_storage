@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid Email Address'),
   password: z.string().min(1, 'Password is required')
 });
 
@@ -9,10 +9,10 @@ export const lyricSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   writer_name: z.string().min(1, 'Writer name is required'),
   category: z.enum(['Bhajan', 'Koras'], {
-    errorMap: () => ({ message: 'Category must be either Bhajan or Koras' })
+    error: () => ({ message: 'Category must be either Bhajan or Koras' })
   }),
-  number: z.string().min(1, 'Number is required'),
-  content: z.string().min(1, 'Content is required'),
+  number: z.string().min(1, { message: 'Number is required' }),
+  content: z.string().min(1, { message: 'Content is required' }),
   submitted_by: z.string().optional()
 });
 
