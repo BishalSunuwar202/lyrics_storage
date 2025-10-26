@@ -4,6 +4,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import lyricsRoutes from './routes/lyrics.js';
+import pool from './db.js';
 
 dotenv.config();
 
@@ -24,6 +25,17 @@ app.get('/api/health', (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
+});
+
+//testing postgress connection
+app.get("/", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT current_database()");
+    res.send(`the database name is ${result.rows[0].current_database}`);
+  } catch (error) {
+    console.error("Error testing postgres connection:", error);
+    res.status(500).json({ error: "Error testing postgres connection" });
+  }
 });
 
 app.listen(PORT, () => {
