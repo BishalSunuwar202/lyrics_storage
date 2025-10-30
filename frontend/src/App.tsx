@@ -3,13 +3,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProjectorProvider } from './contexts/ProjectorContext';
-import { FavoritesProvider } from './contexts/FavoritesContext';
-
 import Home from './pages/Home';
+import LyricView from './pages/LyricsView';
 import Submit from './pages/Submit';
-import LyricView from './pages/LyricView';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import { FavoritesProvider } from './contexts/FavouritesContext';
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
