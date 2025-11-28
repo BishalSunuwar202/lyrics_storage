@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLyrics } from '../api/lyrics';
 import { Link } from 'react-router-dom';
-import { Search, Heart, Music } from 'lucide-react';
+import { Search, Heart, Music, X } from 'lucide-react';
 import { useFavorites } from '../contexts/useFavorites';
 
 export default function Home() {
@@ -16,9 +16,12 @@ export default function Home() {
     queryKey: ['lyrics', page, category, search],
     queryFn: () => fetchLyrics(page, 10, category, search)
   });
+  
+  console.log(data?.lyrics[0])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setCategory(category)
     setSearch(searchInput);
     setPage(1);
   };
@@ -36,8 +39,26 @@ export default function Home() {
     }
   };
 
+  const clearAllFilters = () => {
+    setSearch('');
+    setSearchInput('');
+    setCategory('');
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+    setSearchInput('');
+    setPage(1);
+  };
+
+  const hasActiveFilters = search || category;
+
+  // Sync searchInput with search when search changes externally
+  // This ensures the input shows the current search term
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-center mb-6">
@@ -52,9 +73,19 @@ export default function Home() {
                 placeholder="Search by title, writer, or content..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full px-4 py-3 pl-12 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 pl-12 pr-20 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-24 top-3.5 p-1 hover:bg-slate-200 rounded-full transition"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              )}
               <button
                 type="submit"
                 className="absolute right-2 top-2 px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -63,6 +94,43 @@ export default function Home() {
               </button>
             </div>
           </form>
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="max-w-2xl mx-auto mb-4 flex flex-wrap items-center gap-2 justify-center">
+              <span className="text-sm text-slate-600">Active filters:</span>
+              {search && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                  Search: "{search}"
+                  <button
+                    onClick={clearSearch}
+                    className="hover:bg-blue-200 rounded-full p-0.5 transition"
+                    aria-label="Remove search filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {category && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                  Category: {category}
+                  <button
+                    onClick={() => handleCategoryChange('')}
+                    className="hover:bg-blue-200 rounded-full p-0.5 transition"
+                    aria-label="Remove category filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={clearAllFilters}
+                className="ml-2 px-4 py-1.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition text-sm font-medium"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
 
           <div className="flex justify-center gap-4 mb-6">
             <button
@@ -170,6 +238,20 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            
+            {data?.lyrics && data.lyrics.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-slate-600 text-lg mb-4">No Lyrics Found</p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    Clear Filters & Show All
+                  </button>
+                )}
+              </div>
+            )}
 
             {data.totalPages > 1 && (
               <div className="flex justify-center gap-2">

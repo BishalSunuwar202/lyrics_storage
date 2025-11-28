@@ -21,7 +21,7 @@ export interface LyricsResponse {
   totalPages: number;
 }
 
-export const fetchLyrics = async (
+export const  fetchLyrics = async (
   page: number = 1,
   limit: number = 10,
   category?: string,
@@ -31,13 +31,17 @@ export const fetchLyrics = async (
     page: page.toString(),
     limit: limit.toString()
   });
-
+  //console.log(search)
   if (category) params.append('category', category);
   if (search) params.append('search', search);
 
-  const response = await fetch(`${API_URL}/lyrics?${params}`);
-  console.log(response)
+  console.log(params.toString())
+  const response = await fetch(`${API_URL}/lyrics?${params}`); 
+  // const data = await response.json(); 
+  // console.log(data)
   if (!response.ok) throw new Error('Failed to fetch lyrics');
+  // const data = await response.json()
+  // console.log(data)
   return response.json();
 };
 

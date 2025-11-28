@@ -8,44 +8,70 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { page = 1, limit = 10, category, search } = req.query;
+  //console.log(category)
   const offset = (page - 1) * limit;
 
   try {
-    let query = `
-      SELECT * FROM lyrics
-      WHERE status = 'approved'
-    `;
+    let query = `SELECT * FROM lyrics`;
     const queryParams = [];
     let paramCount = 1;
+    const conditions = [];
 
     if (category) {
-      query += ` AND category = $${paramCount}`;
+      conditions.push(`category = $${paramCount}`);
       queryParams.push(category);
       paramCount++;
     }
 
     if (search) {
-      query += ` AND (
+      conditions.push(`(
         title ILIKE $${paramCount} OR
         writer_name ILIKE $${paramCount} OR
         content ILIKE $${paramCount}
-      )`;
+      )`);
       queryParams.push(`%${search}%`);
       paramCount++;
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
     query += ` ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     queryParams.push(limit, offset);
 
+    console.log("query", query, "param", queryParams);
     const result = await pool.query(query, queryParams);
 
-    const countQuery = `
-      SELECT COUNT(*) FROM lyrics
-      WHERE status = 'approved'
-      ${category ? `AND category = '${category}'` : ''}
-      ${search ? `AND (title ILIKE '%${search}%' OR writer_name ILIKE '%${search}%' OR content ILIKE '%${search}%')` : ''}
-    `;
-    const countResult = await pool.query(countQuery);
+    // Build count query with same conditions
+    let countQuery = `SELECT COUNT(*) FROM lyrics`;
+    const countConditions = [];
+    let countParamCount = 1;
+
+    if (category) {
+      countConditions.push(`category = $${countParamCount}`);
+      countParamCount++;
+    }
+
+    if (search) {
+      countConditions.push(`(
+        title ILIKE $${countParamCount} OR
+        writer_name ILIKE $${countParamCount} OR
+        content ILIKE $${countParamCount}
+      )`);
+      countParamCount++;
+    }
+
+    if (countConditions.length > 0) {
+      countQuery += ` WHERE ${countConditions.join(' AND ')}`;
+    }
+
+    const countParams = [];
+    if (category) countParams.push(category);
+    if (search) countParams.push(`%${search}%`);
+
+    const countResult = await pool.query(countQuery, countParams);
+    //console.log("resultcount", countResult)
 
     res.json({
       lyrics: result.rows,
@@ -54,6 +80,7 @@ router.get('/', async (req, res) => {
       totalPages: Math.ceil(countResult.rows[0].count / limit)
     });
   } catch (error) {
+    
     console.error('Error fetching lyrics:', error);
     res.status(500).json({ error: 'Server error fetching lyrics' });
   }
