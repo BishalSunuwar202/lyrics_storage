@@ -44,7 +44,7 @@ export default function LyricView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <button
           onClick={() => navigate('/')}

@@ -25,7 +25,7 @@ export const ProjectorProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const increaseFontSize = () => {
-    setSettings(prev => ({ ...prev, fontSize: Math.min(prev.fontSize + 4, 72) }));
+    setSettings(prev => ({ ...prev, fontSize: Math.min(prev.fontSize + 4, 100) }));
   };
 
   const decreaseFontSize = () => {
