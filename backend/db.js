@@ -1,14 +1,19 @@
 // backend/db.js
-import pkg from "pg";
+import pg from "pg";
 import dotenv from "dotenv";
-
-const { Pool } = pkg;
 
 dotenv.config();
 
-// Are we running in production? (Vercel sets NODE_ENV=production by default)
+const { Pool } = pg;
+
+// 🔊 Debug logs so we SEE what Vercel is using
+console.log(">>> [db.js] NODE_ENV:", process.env.NODE_ENV);
+console.log(">>> [db.js] DATABASE_URL defined? ", !!process.env.DATABASE_URL);
+console.log(">>> [db.js] DB_HOST:", process.env.DB_HOST);
+
 const isProduction = process.env.NODE_ENV === "production";
 
+// Base config: URL in prod, individual fields in dev
 const baseConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
@@ -21,16 +26,20 @@ const baseConfig = process.env.DATABASE_URL
       port: process.env.DB_PORT,
     };
 
-const pool = new Pool({
+// FINAL config (we **force safe SSL** in prod)
+const finalConfig = {
   ...baseConfig,
-  // In production, DB requires SSL, but its cert is self-signed → ignore cert verification
   ssl: isProduction
-    ? { rejectUnauthorized: false }
-    : false, // local dev: no SSL if your local DB doesn’t use SSL
-});
+    ? { rejectUnauthorized: false } // accept self-signed certs
+    : false, // for local dev with non-SSL postgres
+};
+
+console.log(">>> [db.js] Final PG config:", JSON.stringify(finalConfig, null, 2));
+
+const pool = new Pool(finalConfig);
 
 pool.on("connect", () => {
-  console.log("✅ Database connection established");
+  console.log("✅ [db.js] Database connection established");
 });
 
 export default pool;
