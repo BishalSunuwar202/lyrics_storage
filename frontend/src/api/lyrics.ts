@@ -35,7 +35,6 @@ export const  fetchLyrics = async (
   if (category) params.append('category', category);
   if (search) params.append('search', search);
 
-  console.log(params.toString())
   const response = await fetch(`${API_URL}/lyrics?${params}`); 
   // const data = await response.json(); 
   // console.log(data)
