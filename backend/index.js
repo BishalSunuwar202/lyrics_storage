@@ -15,10 +15,31 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 //app.use(helmet());
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true // Enable credentials for sessions
-}));
+// app.use(cors({
+//   origin: 'http://localhost:5173',
+//   credentials: true // Enable credentials for sessions
+// }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://lyrics-storage-backend.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow REST tools / server-to-server with no origin
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
