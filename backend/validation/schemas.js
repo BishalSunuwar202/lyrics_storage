@@ -9,7 +9,7 @@ export const lyricSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   writer_name: z.string().min(1, 'Writer name is required'),
   category: z.enum(['Bhajan', 'Koras'], {
-    error: () => ({ message: 'Category must be either Bhajan or Koras' })
+     message: 'Category must be either Bhajan or Koras' 
   }),
   number: z.string().min(1, { message: 'Number is required' }),
   content: z.string().min(1, { message: 'Content is required' }),

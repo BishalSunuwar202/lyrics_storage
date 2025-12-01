@@ -8,8 +8,12 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { page = 1, limit = 10, category, search } = req.query;
+  console.log(typeof(page))
   //console.log(category)
-  const offset = (page - 1) * limit;
+
+ 
+
+  const offset = (Number(page) - 1) * Number(limit);
 
   try {
     let query = `SELECT * FROM lyrics`;
@@ -82,6 +86,7 @@ router.get('/', async (req, res) => {
   } catch (error) {
     
     console.error('Error fetching lyrics:', error);
+    console.log('stack', error.stack)
     res.status(500).json({ error: 'Server error fetching lyrics' });
   }
 });
