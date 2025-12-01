@@ -7,9 +7,9 @@ dotenv.config();
 const { Pool } = pg;
 
 // 🔊 Debug logs so we SEE what Vercel is using
-console.log(">>> [db.js] NODE_ENV:", process.env.NODE_ENV);
-console.log(">>> [db.js] DATABASE_URL defined? ", !!process.env.DATABASE_URL);
-console.log(">>> [db.js] DB_HOST:", process.env.DB_HOST);
+// console.log(">>> [db.js] NODE_ENV:", process.env.NODE_ENV);
+// console.log(">>> [db.js] DATABASE_URL defined? ", !!process.env.DATABASE_URL);
+// console.log(">>> [db.js] DB_HOST:", process.env.DB_HOST);
 
 const isProduction = process.env.NODE_ENV === "production";
 
