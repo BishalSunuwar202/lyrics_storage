@@ -1,9 +1,10 @@
 import pkg from "pg";
 import dotenv from "dotenv";
+import fs from 'fs'
 const { Pool } = pkg;
 
 dotenv.config();
-const fs = require('fs');
+
 const pool = new Pool(
   process.env.DATABASE_URL
     ? { connectionString: process.env.DATABASE_URL, ssl: {
