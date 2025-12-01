@@ -3,10 +3,13 @@ import dotenv from "dotenv";
 const { Pool } = pkg;
 
 dotenv.config();
-console.log("1");
+const fs = require('fs');
 const pool = new Pool(
   process.env.DATABASE_URL
-    ? { connectionString: process.env.DATABASE_URL }
+    ? { connectionString: process.env.DATABASE_URL, ssl: {
+      ca: fs.readFileSync('path/to/ca.crt').toString(),
+      rejectUnauthorized: true,
+    }}
     : {
         user: process.env.DB_USER,
         host: process.env.DB_HOST,

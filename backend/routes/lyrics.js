@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { page = 1, limit = 10, category, search } = req.query;
-  console.log(typeof(page))
+  //console.log(typeof(page))
   //console.log(category)
 
  

@@ -11,7 +11,6 @@ const createAdmin = async () => {
     try {
         const plain = "spaceX202@";
 const hash = await bcrypt.hash(plain, 10);
-console.log(hash);
         await pool.query(adminQueryText)
         console.log("admin table created if not existed")
     } catch(err) {
