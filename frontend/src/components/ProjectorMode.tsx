@@ -182,9 +182,9 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-center h-full p-8">
+      <div className="flex items-center justify-center h-full p-8 overflow-hidden">
         <div
-          className="max-w-6xl w-full"
+          className="max-w-6xl w-full h-full overflow-y-auto overflow-x-hidden"
           style={{
             fontSize: `${settings.fontSize}px`,
             textAlign: settings.textAlign,
