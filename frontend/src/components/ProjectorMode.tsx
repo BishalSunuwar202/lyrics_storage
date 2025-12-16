@@ -1,20 +1,43 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Minus, Palette, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { X, Plus, Minus, Palette, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProjector } from '../contexts/useProjector';
 import type { Lyric } from '../api/lyrics';
 
 interface ProjectorModeProps {
-  lyric: Lyric;
+  lyric?: Lyric;
+  lyrics?: Lyric[];
   onClose: () => void;
 }
 
-export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
+export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeProps) {
   const { settings, updateSettings, increaseFontSize, decreaseFontSize, applyTheme } = useProjector();
   const [showControls, setShowControls] = useState(true);
   const [currentLine, setCurrentLine] = useState(0);
   const [displayMode, setDisplayMode] = useState<'full' | 'line'>('full');
+  const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
 
-  const lines = lyric.content.split('\n').filter(line => line.trim() !== '');
+  // Support both single lyric and multiple lyrics
+  const lyricsArray = lyrics || (lyric ? [lyric] : []);
+  const currentLyric = lyricsArray[currentLyricIndex];
+
+  const lines = currentLyric ? currentLyric.content.split('\n').filter(line => line.trim() !== '') : [];
+
+  // Reset line when lyric changes
+  useEffect(() => {
+    setCurrentLine(0);
+  }, [currentLyricIndex]);
+
+  const goToNextLyric = useCallback(() => {
+    if (lyricsArray.length > 1) {
+      setCurrentLyricIndex((prev) => (prev + 1) % lyricsArray.length);
+    }
+  }, [lyricsArray.length]);
+
+  const goToPreviousLyric = useCallback(() => {
+    if (lyricsArray.length > 1) {
+      setCurrentLyricIndex((prev) => (prev - 1 + lyricsArray.length) % lyricsArray.length);
+    }
+  }, [lyricsArray.length]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -22,6 +45,10 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
         setCurrentLine(prev => Math.max(0, prev - 1));
       } else if (e.key === 'ArrowDown' && displayMode === 'line') {
         setCurrentLine(prev => Math.min(lines.length - 1, prev + 1));
+      } else if (e.key === 'ArrowLeft' && lyricsArray.length > 1) {
+        goToPreviousLyric();
+      } else if (e.key === 'ArrowRight' && lyricsArray.length > 1) {
+        goToNextLyric();
       } else if (e.key === 'Escape') {
         onClose();
       } else if (e.key === '+' || e.key === '=') {
@@ -33,12 +60,16 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [displayMode, lines.length, onClose, increaseFontSize, decreaseFontSize]);
+  }, [displayMode, lines.length, onClose, increaseFontSize, decreaseFontSize, lyricsArray.length, goToNextLyric, goToPreviousLyric]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowControls(false), 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  if (!currentLyric) {
+    return null;
+  }
 
   return (
     <div
@@ -62,7 +93,12 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
             >
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-white font-semibold text-lg">{lyric.title}</h2>
+            <h2 className="text-white font-semibold text-lg">{currentLyric.title}</h2>
+            {lyricsArray.length > 1 && (
+              <span className="text-white text-sm opacity-75">
+                ({currentLyricIndex + 1} / {lyricsArray.length})
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -179,6 +215,25 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
               Line by Line
             </button>
           </div>
+
+          {lyricsArray.length > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPreviousLyric}
+                className="p-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition"
+                title="Previous lyric (←)"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goToNextLyric}
+                className="p-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition"
+                title="Next lyric (→)"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -192,7 +247,7 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
           }}
         >
           {displayMode === 'full' ? (
-            <pre className="whitespace-pre-wrap font-sans">{lyric.content}</pre>
+            <pre className="whitespace-pre-wrap font-sans">{currentLyric.content}</pre>
           ) : (
             <div className="font-sans">
               {lines[currentLine]}
@@ -206,6 +261,7 @@ export default function ProjectorMode({ lyric, onClose }: ProjectorModeProps) {
 
       <div className="absolute bottom-4 right-4 text-sm opacity-50">
         Press ESC to exit | ↑↓ to navigate lines | +/- to adjust font
+        {lyricsArray.length > 1 && ' | ←→ to navigate lyrics'}
       </div>
     </div>
   );

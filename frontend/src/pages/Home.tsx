@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLyrics } from '../api/lyrics';
 import { Link } from 'react-router-dom';
-import { Search, Heart, Music, X } from 'lucide-react';
+import { Search, Heart, Music, X, Projector } from 'lucide-react';
 import { useFavorites } from '../contexts/useFavorites';
+import ProjectorMode from '../components/ProjectorMode';
+import type { Lyric } from '../api/lyrics';
 
 export default function Home() {
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<string>('');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [selectedLyrics, setSelectedLyrics] = useState<Set<string>>(new Set());
+  const [showProjector, setShowProjector] = useState(false);
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
   const { data, isLoading, error } = useQuery({
@@ -39,6 +43,29 @@ export default function Home() {
     }
   };
 
+  const toggleSelection = (id: string) => {
+    setSelectedLyrics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleProjectSelected = () => {
+    if (selectedLyrics.size > 0) {
+      setShowProjector(true);
+    }
+  };
+
+  const getSelectedLyricsArray = (): Lyric[] => {
+    if (!data) return [];
+    return data.lyrics.filter(lyric => selectedLyrics.has(lyric.id));
+  };
+
   const clearAllFilters = () => {
     setSearch('');
     setSearchInput('');
@@ -57,8 +84,20 @@ export default function Home() {
   // Sync searchInput with search when search changes externally
   // This ensures the input shows the current search term
 
+  const selectedLyricsArray = getSelectedLyricsArray();
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
+      {showProjector && selectedLyricsArray.length > 0 && (
+        <ProjectorMode
+          lyrics={selectedLyricsArray}
+          onClose={() => {
+            setShowProjector(false);
+            setSelectedLyrics(new Set());
+          }}
+        />
+      )}
+      
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-center mb-6">
@@ -193,14 +232,25 @@ export default function Home() {
               {data.lyrics.map((lyric) => (
                 <div
                   key={lyric.id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
+                  className={`bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 ${
+                    selectedLyrics.has(lyric.id) ? 'ring-2 ring-blue-500' : ''
+                  }`}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-slate-800 mb-1">
-                        {lyric.title}
-                      </h3>
-                      <p className="text-sm text-slate-600">by {lyric.writer_name}</p>
+                    <div className="flex items-start gap-2 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedLyrics.has(lyric.id)}
+                        onChange={() => toggleSelection(lyric.id)}
+                        className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-slate-800 mb-1">
+                          {lyric.title}
+                        </h3>
+                        <p className="text-sm text-slate-600">by {lyric.writer_name}</p>
+                      </div>
                     </div>
                     <button
                       onClick={() => toggleFavorite(lyric.id)}
@@ -277,6 +327,19 @@ export default function Home() {
               </div>
             )}
           </>
+        )}
+
+        {/* Floating Project Mode Button */}
+        {selectedLyrics.size > 0 && (
+          <div className="fixed bottom-6 right-6 z-40">
+            <button
+              onClick={handleProjectSelected}
+              className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105 font-semibold text-lg"
+            >
+              <Projector className="w-6 h-6" />
+              Project Selected ({selectedLyrics.size})
+            </button>
+          </div>
         )}
       </div>
     </div>
