@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Plus, Minus, Palette, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProjector } from '../contexts/useProjector';
 import type { Lyric } from '../api/lyrics';
@@ -15,6 +15,8 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
   const [currentLine, setCurrentLine] = useState(0);
   const [displayMode, setDisplayMode] = useState<'full' | 'line'>('full');
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+  const [navbarHeight, setNavbarHeight] = useState(0);
+  const navbarRef = useRef<HTMLDivElement>(null);
 
   // Support both single lyric and multiple lyrics
   const lyricsArray = lyrics || (lyric ? [lyric] : []);
@@ -67,6 +69,16 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
     return () => clearTimeout(timer);
   }, []);
 
+  // Measure navbar height when it's visible
+  useEffect(() => {
+    if (showControls && navbarRef.current) {
+      const height = navbarRef.current.offsetHeight;
+      setNavbarHeight(height);
+    } else if (!showControls) {
+      setNavbarHeight(0);
+    }
+  }, [showControls]);
+
   if (!currentLyric) {
     return null;
   }
@@ -81,6 +93,7 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
       onMouseMove={() => setShowControls(true)}
     >
       <div
+        ref={navbarRef}
         className={`absolute top-0 left-0 right-0 bg-black bg-opacity-90 p-4 transition-transform duration-300 ${
           showControls ? 'translate-y-0' : '-translate-y-full'
         }`}
@@ -237,7 +250,12 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
         </div>
       </div>
 
-      <div className="flex items-center justify-center h-full p-8 overflow-hidden">
+      <div 
+        className="flex items-center justify-center h-full p-8 overflow-hidden transition-all duration-300"
+        style={{
+          paddingTop: showControls ? `${navbarHeight + 32}px` : '32px'
+        }}
+      >
         <div
           className="max-w-6xl w-full h-full overflow-y-auto overflow-x-hidden"
           style={{
