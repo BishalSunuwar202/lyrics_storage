@@ -17,6 +17,7 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
   const navbarRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Support both single lyric and multiple lyrics
   const lyricsArray = lyrics || (lyric ? [lyric] : []);
@@ -43,10 +44,24 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowUp' && displayMode === 'line') {
-        setCurrentLine(prev => Math.max(0, prev - 1));
-      } else if (e.key === 'ArrowDown' && displayMode === 'line') {
-        setCurrentLine(prev => Math.min(lines.length - 1, prev + 1));
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (displayMode === 'line') {
+          // Jump 5 lines at a time in line mode
+          setCurrentLine(prev => Math.max(0, prev - 5));
+        } else if (scrollContainerRef.current) {
+          // Scroll up by 150px in full mode
+          scrollContainerRef.current.scrollBy({ top: -150, behavior: 'smooth' });
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (displayMode === 'line') {
+          // Jump 5 lines at a time in line mode
+          setCurrentLine(prev => Math.min(lines.length - 1, prev + 5));
+        } else if (scrollContainerRef.current) {
+          // Scroll down by 150px in full mode
+          scrollContainerRef.current.scrollBy({ top: 150, behavior: 'smooth' });
+        }
       } else if (e.key === 'ArrowLeft' && lyricsArray.length > 1) {
         goToPreviousLyric();
       } else if (e.key === 'ArrowRight' && lyricsArray.length > 1) {
@@ -257,6 +272,7 @@ export default function ProjectorMode({ lyric, lyrics, onClose }: ProjectorModeP
         }}
       >
         <div
+          ref={scrollContainerRef}
           className="max-w-6xl w-full h-full overflow-y-auto overflow-x-hidden"
           style={{
             fontSize: `${settings.fontSize}px`,
