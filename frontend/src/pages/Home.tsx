@@ -202,6 +202,16 @@ export default function Home() {
             >
               Koras
             </button>
+            <button
+              onClick={() => handleCategoryChange('Other')}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                category === 'Other'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Other
+            </button>
           </div>
 
           <div className="flex justify-center">

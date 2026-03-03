@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
     query += ` ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     queryParams.push(limit, offset);
 
-    console.log("query", query, "param", queryParams);
+    //console.log("query", query, "param", queryParams);
     const result = await pool.query(query, queryParams);
 
     // Build count query with same conditions
@@ -134,7 +134,7 @@ router.post(
         `INSERT INTO lyrics (title, writer_name, category, number, content, submitted_by, status)
          VALUES ($1, $2, $3, $4, $5, $6, 'pending')
          RETURNING *`,
-        [title, writer_name, category, number, content, submitted_by || null]
+        [title, writer_name, category, number || '', content, submitted_by || null]
       );
 
       res.status(201).json(result.rows[0]);

@@ -8,19 +8,22 @@ export const loginSchema = z.object({
 export const lyricSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   writer_name: z.string().min(1, 'Writer name is required'),
-  category: z.enum(['Bhajan', 'Koras'], {
-     message: 'Category must be either Bhajan or Koras' 
+  category: z.enum(['Bhajan', 'Koras', 'Other'], {
+     message: 'Category must be Bhajan, Koras, or Other'
   }),
-  number: z.string().min(1, { message: 'Number is required' }),
+  number: z.string().optional(),
   content: z.string().min(1, { message: 'Content is required' }),
   submitted_by: z.string().optional()
+}).refine(data => data.category === 'Other' || (data.number && data.number.length > 0), {
+  message: 'Number is required for Bhajan and Koras',
+  path: ['number']
 });
 
 export const lyricUpdateSchema = z.object({
   title: z.string().min(1).optional(),
   writer_name: z.string().min(1).optional(),
-  category: z.enum(['Bhajan', 'Koras']).optional(),
-  number: z.string().min(1).optional(),
+  category: z.enum(['Bhajan', 'Koras', 'Other']).optional(),
+  number: z.string().optional(),
   content: z.string().min(1).optional(),
   status: z.enum(['pending', 'approved']).optional()
 });

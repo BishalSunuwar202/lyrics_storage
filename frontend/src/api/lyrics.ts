@@ -5,7 +5,7 @@ export interface Lyric {
   id: string;
   title: string;
   writer_name: string;
-  category: 'Bhajan' | 'Koras';
+  category: 'Bhajan' | 'Koras' | 'Other';
   number: string;
   content: string;
   status: 'pending' | 'approved';

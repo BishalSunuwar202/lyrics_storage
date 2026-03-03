@@ -46,8 +46,13 @@ export default function Submit() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.writer_name || !formData.number || !formData.content) {
+    if (!formData.title || !formData.writer_name || !formData.content) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.category !== 'Other' && !formData.number) {
+      toast.error('Number is required for Bhajan and Koras');
       return;
     }
 
@@ -55,10 +60,11 @@ export default function Submit() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const newData = { ...formData, [e.target.name]: e.target.value };
+    if (e.target.name === 'category' && e.target.value === 'Other') {
+      newData.number = '';
+    }
+    setFormData(newData);
   };
 
   return (
@@ -118,23 +124,26 @@ export default function Submit() {
                   >
                     <option value="Bhajan">Bhajan</option>
                     <option value="Koras">Koras</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="number"
-                    value={formData.number}
-                    onChange={handleChange}
-                    placeholder="e.g., 123"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
+                {formData.category !== 'Other' && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="number"
+                      value={formData.number}
+                      onChange={handleChange}
+                      placeholder="e.g., 123"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -205,9 +214,11 @@ export default function Submit() {
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
                     {formData.category}
                   </span>
-                  <span className="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm">
-                    #{formData.number}
-                  </span>
+                  {formData.number && (
+                    <span className="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm">
+                      #{formData.number}
+                    </span>
+                  )}
                 </div>
                 <pre className="whitespace-pre-wrap font-sans text-slate-700">
                   {formData.content}
