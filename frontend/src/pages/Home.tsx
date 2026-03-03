@@ -21,8 +21,6 @@ export default function Home() {
     queryFn: () => fetchLyrics(page, 10, category, search)
   });
   
-  console.log(data?.lyrics[0])
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCategory(category)
@@ -100,9 +98,18 @@ export default function Home() {
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <Music className="w-10 h-10 text-blue-600 mr-3" />
-            <h1 className="text-4xl font-bold text-slate-800">Lyrics Library</h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="w-16" />
+            <div className="flex items-center">
+              <Music className="w-10 h-10 text-blue-600 mr-3" />
+              <h1 className="text-4xl font-bold text-slate-800">Lyrics Library</h1>
+            </div>
+            <Link
+              to="/admin/login"
+              className="text-sm text-slate-400 hover:text-slate-600 transition w-16 text-right"
+            >
+              Admin
+            </Link>
           </div>
 
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-6">
