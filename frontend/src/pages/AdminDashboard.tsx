@@ -125,7 +125,7 @@ export default function AdminDashboard() {
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-slate-800">Admin Dashboard</h1>
             <div className="flex items-center gap-4">
-              <span className="text-slate-600">Welcome, {user.name}</span>
+              <span className="text-slate-600">Welcome, {user.email}</span>
               <button
                 onClick={handleLogout}
                 className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                   : 'bg-white text-slate-700 hover:bg-slate-100'
               }`}
             >
-              Approved
+              Approved ({approvedData?.lyrics?.length ?? approvedData?.total ?? 0})
             </button>
           </div>
 
@@ -239,9 +239,11 @@ export default function AdminDashboard() {
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
                   {lyric.category}
                 </span>
-                <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                  #{lyric.number}
-                </span>
+                {lyric.number && (
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                    #{lyric.number}
+                  </span>
+                )}
                 {lyric.submitted_by && (
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
                     by {lyric.submitted_by}
