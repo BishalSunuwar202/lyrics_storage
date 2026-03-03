@@ -33,8 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const data = await response.json();
-    // Store only in React state (memory) - not persisted anywhere
-    setToken(data.token);
+    setToken(data.accessToken);
     setUser(data.user);
   };
 
