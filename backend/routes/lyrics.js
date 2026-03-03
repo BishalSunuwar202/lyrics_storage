@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     let query = `SELECT * FROM lyrics`;
     const queryParams = [];
     let paramCount = 1;
-    const conditions = [];
+    const conditions = [`status = 'approved'`];
 
     if (category) {
       conditions.push(`category = $${paramCount}`);
@@ -37,19 +37,15 @@ router.get('/', async (req, res) => {
       paramCount++;
     }
 
-    if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(' AND ')}`;
-    }
-
+    query += ` WHERE ${conditions.join(' AND ')}`;
     query += ` ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     queryParams.push(limit, offset);
 
-    //console.log("query", query, "param", queryParams);
     const result = await pool.query(query, queryParams);
 
     // Build count query with same conditions
     let countQuery = `SELECT COUNT(*) FROM lyrics`;
-    const countConditions = [];
+    const countConditions = [`status = 'approved'`];
     let countParamCount = 1;
 
     if (category) {
@@ -66,9 +62,7 @@ router.get('/', async (req, res) => {
       countParamCount++;
     }
 
-    if (countConditions.length > 0) {
-      countQuery += ` WHERE ${countConditions.join(' AND ')}`;
-    }
+    countQuery += ` WHERE ${countConditions.join(' AND ')}`;
 
     const countParams = [];
     if (category) countParams.push(category);
