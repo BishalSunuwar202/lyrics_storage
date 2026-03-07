@@ -158,7 +158,7 @@ router.put(
         values.push(title);
         paramCount++;
       }
-      if (writer_name) {
+      if (writer_name !== undefined) {
         updates.push(`writer_name = $${paramCount}`);
         values.push(writer_name);
         paramCount++;
@@ -168,7 +168,7 @@ router.put(
         values.push(category);
         paramCount++;
       }
-      if (number) {
+      if (number !== undefined) {
         updates.push(`number = $${paramCount}`);
         values.push(number);
         paramCount++;
