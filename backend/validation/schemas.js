@@ -21,7 +21,7 @@ export const lyricSchema = z.object({
 
 export const lyricUpdateSchema = z.object({
   title: z.string().min(1).optional(),
-  writer_name: z.string().min(1).optional(),
+  writer_name: z.string().optional(),
   category: z.enum(['Bhajan', 'Koras', 'Other']).optional(),
   number: z.string().optional(),
   content: z.string().min(1).optional(),
