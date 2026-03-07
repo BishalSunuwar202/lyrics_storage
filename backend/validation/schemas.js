@@ -7,7 +7,7 @@ export const loginSchema = z.object({
 
 export const lyricSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  writer_name: z.string().min(1, 'Writer name is required'),
+  writer_name: z.string().optional(),
   category: z.enum(['Bhajan', 'Koras', 'Other'], {
      message: 'Category must be Bhajan, Koras, or Other'
   }),

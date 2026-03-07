@@ -128,7 +128,7 @@ router.post(
         `INSERT INTO lyrics (title, writer_name, category, number, content, submitted_by, status)
          VALUES ($1, $2, $3, $4, $5, $6, 'pending')
          RETURNING *`,
-        [title, writer_name, category, number || '', content, submitted_by || null]
+        [title, writer_name || '', category, number || '', content, submitted_by || null]
       );
 
       res.status(201).json(result.rows[0]);
