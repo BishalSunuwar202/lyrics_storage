@@ -8,12 +8,10 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { page = 1, limit = 10, category, search } = req.query;
-  //console.log(typeof(page))
-  //console.log(category)
-
- 
-
   const offset = (Number(page) - 1) * Number(limit);
+  const normalizedSearch = typeof search === 'string' ? search.trim() : '';
+  const searchPattern = `%${normalizedSearch}%`;
+  const isNumericSearch = /^\d+$/.test(normalizedSearch);
 
   try {
     let query = `SELECT * FROM lyrics`;
@@ -27,19 +25,32 @@ router.get('/', async (req, res) => {
       paramCount++;
     }
 
-    if (search) {
+    if (normalizedSearch) {
       conditions.push(`(
         title ILIKE $${paramCount} OR
         writer_name ILIKE $${paramCount} OR
         number ILIKE $${paramCount} OR
         content ILIKE $${paramCount}
       )`);
-      queryParams.push(`%${search}%`);
+      queryParams.push(searchPattern);
       paramCount++;
     }
 
     query += ` WHERE ${conditions.join(' AND ')}`;
-    query += ` ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+
+    if (isNumericSearch) {
+      query += ` ORDER BY CASE
+        WHEN number = $${paramCount} THEN 0
+        WHEN number LIKE $${paramCount + 1} THEN 1
+        ELSE 2
+      END, created_at DESC`;
+      queryParams.push(normalizedSearch, `${normalizedSearch}%`);
+      paramCount += 2;
+    } else {
+      query += ` ORDER BY created_at DESC`;
+    }
+
+    query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     queryParams.push(limit, offset);
 
     const result = await pool.query(query, queryParams);
@@ -54,7 +65,7 @@ router.get('/', async (req, res) => {
       countParamCount++;
     }
 
-    if (search) {
+    if (normalizedSearch) {
       countConditions.push(`(
         title ILIKE $${countParamCount} OR
         writer_name ILIKE $${countParamCount} OR
@@ -68,7 +79,7 @@ router.get('/', async (req, res) => {
 
     const countParams = [];
     if (category) countParams.push(category);
-    if (search) countParams.push(`%${search}%`);
+    if (normalizedSearch) countParams.push(searchPattern);
 
     const countResult = await pool.query(countQuery, countParams);
     //console.log("resultcount", countResult)
