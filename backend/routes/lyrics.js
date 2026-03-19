@@ -31,6 +31,7 @@ router.get('/', async (req, res) => {
       conditions.push(`(
         title ILIKE $${paramCount} OR
         writer_name ILIKE $${paramCount} OR
+        number ILIKE $${paramCount} OR
         content ILIKE $${paramCount}
       )`);
       queryParams.push(`%${search}%`);
@@ -57,6 +58,7 @@ router.get('/', async (req, res) => {
       countConditions.push(`(
         title ILIKE $${countParamCount} OR
         writer_name ILIKE $${countParamCount} OR
+        number ILIKE $${countParamCount} OR
         content ILIKE $${countParamCount}
       )`);
       countParamCount++;

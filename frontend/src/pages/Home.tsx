@@ -116,7 +116,7 @@ export default function Home() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search by title, writer, or content..."
+                placeholder="Search by title, writer, number, or content..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full px-4 py-3 pl-12 pr-20 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
